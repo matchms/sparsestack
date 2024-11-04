@@ -21,6 +21,7 @@ yapf = "^0.40.2"
 testfixtures = "^8.3.0"
 prospector = "^1.12.1"
 poetry-bumpversion = "^0.3.2"
+twine = "^5.1.1"
 
 [build-system]
 requires = ["poetry-core"]
