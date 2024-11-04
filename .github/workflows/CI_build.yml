@@ -42,7 +42,7 @@ jobs:
         shell: bash -l {0}
         run: poetry run prospector -o grouped -o pylint:pylint-report.txt
       - name: Check whether import statements are used consistently
-        run: isort . --check-only --diff
+        run: poetry run isort . --check-only --diff
 
   build_pypi:
     name: Test pypi build
