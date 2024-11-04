@@ -118,13 +118,13 @@ class StackedSparseArray:
             self._is_implemented_slice(row)
             self._is_implemented_slice(col)
             return self.row, self.col, self._slicing_data(name)
-        if row == col is None and isinstance(name, str):
+        if (row is None and col is None) and isinstance(name, str):
             return self.row, self.col, self._slicing_data(name)
         raise IndexError(_slicing_not_implemented_msg)
 
     def _is_implemented_slice(self, input_slice):
         # Currently slices like matrix[2:4, :] or not implemented
-        if not input_slice.start == input_slice.stop == input_slice.step is None:
+        if not (input_slice.start is None and input_slice.stop is None and input_slice.step is None):
             raise IndexError(_slicing_not_implemented_msg)
 
     def _slicing_data(self, name, idx=None):
@@ -134,7 +134,7 @@ class StackedSparseArray:
             if idx is None:
                 return self.data[name]
             return self.data[name][idx]
-        if isinstance(name, slice) and name.start == name.stop == name.step is None:
+        if isinstance(name, slice) and name.start is None and name.stop is None and name.step is None:
             if idx is None:
                 return self.data
             return self.data[idx]
@@ -153,7 +153,7 @@ class StackedSparseArray:
 
         m, n, _ = self.shape
         row, col, name = _unpack_index(key)
-        if row == col is None and isinstance(name, str):
+        if row is None and col is None and isinstance(name, str):
             return row, col, name
 
         if isinstance(name, int):
@@ -302,6 +302,8 @@ class StackedSparseArray:
         """
         self.add_sparse_data(coo_matrix.row, coo_matrix.col, coo_matrix.data, name, join_type)
 
+
+    # pylint: disable=too-many-positional-arguments
     def add_sparse_data(self, row, col, data: np.ndarray,
                         name: str,
                         join_type="left"):
@@ -340,7 +342,9 @@ class StackedSparseArray:
                                                         name,
                                                         join_type=join_type)
 
-    def filter_by_range(self, name: str = None,
+
+    # pylint: disable=too-many-positional-arguments
+    def filter_by_range(self, name: str = None, 
                         low=-np.inf, high=np.inf,
                         above_operator='>',
                         below_operator='<'):
