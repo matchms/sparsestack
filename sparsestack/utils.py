@@ -7,8 +7,8 @@ def join_arrays(row1, col1, data1,
                 join_type="left"):
     """Joins two (structured) sparse arrays.
     """
-    #pylint: disable=too-many-arguments
-
+    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-many-arguments
     # Harmonize row and col dtype
     if row1.dtype != row2.dtype:
         row2 = row2.astype(row1.dtype)
@@ -28,8 +28,9 @@ def _join_arrays(row1, col1, data1,
                 join_type="left"):
     """Join array (numpy array, not structured)
     """
-    #pylint: disable=too-many-arguments
-    #pylint: disable=too-many-locals
+    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
 
     idx1 = np.lexsort((col1, row1))
     idx2 = np.lexsort((col2, row2))
@@ -75,7 +76,8 @@ def set_and_fill_new_array(data1, data2, name,
                            length):
     """Create new structured numpy array and fill with data1 and data2.
     """
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-many-arguments
 
     new_dtype = [(dname, d[0]) for dname, d in data1.dtype.fields.items()]
     if data2.dtype.names is None:
@@ -108,8 +110,9 @@ def get_idx_inner(left_row, left_col, right_row, right_col,
     idx1, idx2
         Numpy array of pre-sorted (np.lexsort) indices for left/right arrays.
     """
-    #pylint: disable=too-many-arguments
-    #pylint: disable=too-many-locals
+    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
 
     idx_left = []
     idx_left_new = []
@@ -145,8 +148,9 @@ def get_idx_outer(left_row, left_col, right_row, right_col,
     idx1, idx2
         Numpy array of pre-sorted (np.lexsort) indices for left/right arrays.
     """
-    #pylint: disable=too-many-arguments
-    #pylint: disable=too-many-locals
+    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
 
     idx_left = []
     idx_left_new = []
@@ -195,7 +199,9 @@ def get_idx_outer(left_row, left_col, right_row, right_col,
 
 def get_idx(left_row, left_col, right_row, right_col, idx1, idx2,
             join_type="left"):
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-many-arguments
+    
     if join_type == "inner":
         return get_idx_inner(left_row, left_col, right_row, right_col,
                              idx1, idx2)
