@@ -14,72 +14,75 @@ on:
 jobs:
 
   first_check:
-    name: first code check / python-3.8 / ubuntu-latest
+    name: first code check / python-3.10 / ubuntu-latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v1
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: '3.10'
       - name: Python info
         run: |
           which python
           python --version
       - name: Build package and create dev environment
         run: |
-          python -m pip install --upgrade pip
-          pip install -e .[dev]
+          python -m pip install --upgrade pip poetry
+          poetry lock
+          poetry install --with dev
       - name: Show pip list
         run: |
           pip list
       - name: Test with coverage
         run: |
-          pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
+          poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
       - name: Check style against standards using prospector
         shell: bash -l {0}
-        run: prospector -o grouped -o pylint:pylint-report.txt
+        run: poetry run prospector -o grouped -o pylint:pylint-report.txt
       - name: Check whether import statements are used consistently
-        run: isort . --check-only --diff
+        run: poetry run isort . --check-only --diff
 
   build_pypi:
     name: Test pypi build
     runs-on: ubuntu-latest
     needs: first_check
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: '3.10'
       - name: Python info
         run: |
           which python
           python --version
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip poetry twine
       - name: Build package
         run: |
-          pip install wheel twine
-          python setup.py sdist bdist_wheel
+          poetry build
       - name: Test package
         run: |
+          poetry lock
+          poetry install --only dev
           python -m twine check dist/*
       - name: Show pip list
         run: |
           pip list
       - name: Install development dependencies
         run: |
-          pip install -e .[dev]
+          poetry lock
+          poetry install
       - name: Show pip list again
         run: |
           pip list
       - name: Run tests
         run: |
-          pytest
+          poetry run pytest
       - name: Show environment variables
         shell: bash -l {0}
         run: |
@@ -93,48 +96,25 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.7', '3.8', '3.9']
-        exclude:
-          - os: ubuntu-latest
-            python-version: 3.8 # or 3.9 when #240 is fully solved 
+        python-version: ['3.10', '3.11', '3.12']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          fetch-depth: "0"
-      - name: Create conda environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-      - name: Show conda config
-        shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-          conda config --show-sources
-          conda config --show
-          conda env list
       - name: Python info
-        shell: bash -l {0}
         run: |
           which python
           python --version
-      - name: Show environment variables
-        shell: bash -l {0}
+      - name: Install dependencies (includinv dev + chemistry)
         run: |
-          env | sort
-      - name: Install conda dependencies
-        shell: bash -l {0}
-        run: |
-          conda install -c conda-forge rdkit
-      - name: Install dev dependencies
-        shell: bash -l {0}
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[dev]
+          python -m pip install --upgrade pip poetry
+          poetry lock
+          poetry install
       - name: Show pip list
-        shell: bash -l {0}
-        run: pip list
+        run: |
+          pip list
       - name: Run tests
-        shell: bash -l {0}
-        run: pytest
+        run: |
+          poetry run pytest

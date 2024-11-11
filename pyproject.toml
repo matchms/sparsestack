@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "sparsestack"
+version = "0.6.2"
+description = "Python library to handle stacks of sparse COO arrays efficiently."
+authors = ["Florian Huber <florian.huber@hs-duesseldorf.de>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+numba = "^0.60.0"
+numpy = ">1.24"
+scipy = "^1.14.1"
+
+[tool.poetry.group.dev.dependencies]
+decorator = "^5.1.1"
+isort = "^5.13.2"
+pytest = "^8.3.3"
+pytest-cov = "^6.0.0"
+yapf = "^0.40.2"
+testfixtures = "^8.3.0"
+prospector = "^1.12.1"
+poetry-bumpversion = "^0.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry_bumpversion.file."sparsestack/__version__.py"]
+
+[tool.isort]
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+no_lines_before = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+lines_after_imports = 2
+known_first_party = "sparsestack"
+skip = "readthedocs/conf.py"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+    "integration-tests",
+]

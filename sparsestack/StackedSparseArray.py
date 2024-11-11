@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy.sparse import coo_matrix
-from scipy.sparse.sputils import get_index_dtype
 from .utils import join_arrays
 
 
 _slicing_not_implemented_msg = "Wrong slicing, or option not yet implemented"
+
+
+def get_index_dtype(maxval):
+    if maxval <= np.iinfo(np.int32).max:
+        return np.int32
+    return np.int64
 
 
 class StackedSparseArray:
@@ -51,7 +56,7 @@ class StackedSparseArray:
     def __init__(self, n_row, n_col):
         self.__n_row = n_row
         self.__n_col = n_col
-        self.idx_dtype = get_index_dtype(maxval=max(n_row, n_col))
+        self.idx_dtype = get_index_dtype(maxval=n_row * n_col)
         self.row = np.array([], dtype=self.idx_dtype)
         self.col = np.array([], dtype=self.idx_dtype)
         self.data = None
@@ -115,22 +120,20 @@ class StackedSparseArray:
             return self.row[idx], self.col[idx], self._slicing_data(name, idx)
         # matrix[:, :, "score_1"]
         if isinstance(row, slice) and isinstance(col, slice):
-            
-
             # TODO: self.row, col are sorted, use that knowledge to avoid masking entire array, damnit.
             rmask = np.ma.masked_inside(self.row, row.start, row.stop).mask
             cmask = np.ma.masked_inside(self.col, col.start, col.stop).mask
             mask = rmask & cmask
             idx = np.where(mask)
             return self.row[mask], self.col[mask], self._slicing_data(name=name, idx=idx)
-        
-        if row == col is None and isinstance(name, str):
+        if (row is None and col is None) and isinstance(name, str):
             return self.row, self.col, self._slicing_data(name)
         raise IndexError(_slicing_not_implemented_msg)
 
     def _is_implemented_slice(self, input_slice):
         pass
-        # if not input_slice.start == input_slice.stop == input_slice.step is None:
+        # Currently slices like matrix[2:4, :] or not implemented
+        # if not (input_slice.start is None and input_slice.stop is None and input_slice.step is None):
         #     raise IndexError(_slicing_not_implemented_msg)
 
     def _slicing_data(self, name, idx=None):
@@ -140,7 +143,7 @@ class StackedSparseArray:
             if idx is None:
                 return self.data[name]
             return self.data[name][idx]
-        if isinstance(name, slice) and name.start == name.stop == name.step is None:
+        if isinstance(name, slice) and name.start is None and name.stop is None and name.step is None:
             if idx is None:
                 return self.data
             return self.data[idx]
@@ -161,7 +164,7 @@ class StackedSparseArray:
 
         m, n, _ = self.shape
         row, col, name = _unpack_index(key)
-        if row == col is None and isinstance(name, str):
+        if row is None and col is None and isinstance(name, str):
             return row, col, name
 
         if isinstance(name, int):
@@ -310,6 +313,8 @@ class StackedSparseArray:
         """
         self.add_sparse_data(coo_matrix.row, coo_matrix.col, coo_matrix.data, name, join_type)
 
+
+    # pylint: disable=too-many-positional-arguments
     def add_sparse_data(self, row, col, data: np.ndarray,
                         name: str,
                         join_type="left"):
@@ -348,7 +353,9 @@ class StackedSparseArray:
                                                         name,
                                                         join_type=join_type)
 
-    def filter_by_range(self, name: str = None,
+
+    # pylint: disable=too-many-positional-arguments
+    def filter_by_range(self, name: str = None, 
                         low=-np.inf, high=np.inf,
                         above_operator='>',
                         below_operator='<'):
