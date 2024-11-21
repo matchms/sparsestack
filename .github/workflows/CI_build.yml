@@ -14,14 +14,14 @@ on:
 jobs:
 
   first_check:
-    name: first code check / python-3.10 / ubuntu-latest
+    name: first code check / python-3.12 / ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
       - name: Python info
         run: |
           which python
@@ -39,9 +39,8 @@ jobs:
           poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
-      - name: Check style against standards using prospector
-        shell: bash -l {0}
-        run: poetry run prospector -o grouped -o pylint:pylint-report.txt
+      - name: Check style against standards using Ruff
+        run: ruff check .
       - name: Check whether import statements are used consistently
         run: poetry run isort . --check-only --diff
 
@@ -51,10 +50,10 @@ jobs:
     needs: first_check
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
       - name: Python info
         run: |
           which python
