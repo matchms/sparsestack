@@ -77,7 +77,7 @@ jobs:
           poetry install
       - name: Show pip list again
         run: |
-          pip list
+          poetry run pip list
       - name: Run tests
         run: |
           poetry run pytest
@@ -112,7 +112,7 @@ jobs:
           poetry install
       - name: Show pip list
         run: |
-          pip list
+          poetry run pip list
       - name: Run tests
         run: |
           poetry run pytest
