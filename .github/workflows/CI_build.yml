@@ -40,7 +40,9 @@ jobs:
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
       - name: Check style against standards using Ruff
-        run: poetry ruff check .
+        run: |
+          pip install ruff
+          ruff check .
       - name: Check whether import statements are used consistently
         run: poetry run isort . --check-only --diff
 
